@@ -3,23 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The 100 (Legendado) - Player de Episódios</title>
-    
+    <title>Player de Episódios</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --background-dark: #0a0f1e;
-            --background-light: #1c233a;
-            --text-primary: #e0e6f1;
-            --text-secondary: #8892b0;
-            --accent-color: #00aaff;
-            --accent-color-darker: #0088cc;
-            --border-color: rgba(136, 146, 176, 0.2);
-            --font-family: 'Inter', sans-serif;
-        }
+        :root { --background-dark: #0a0f1e; --background-light: #1c233a; --text-primary: #e0e6f1; --text-secondary: #8892b0; --accent-color: #00aaff; --accent-color-darker: #0088cc; --border-color: rgba(136, 146, 176, 0.2); --font-family: 'Inter', sans-serif; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font-family); background: var(--background-dark); color: var(--text-primary); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding-top: 40px; }
         .container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
@@ -56,20 +45,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>The 100 (Legendado)</h1>
+    <div class="container" id="player-container-main" style="display: none;">
+        <h1 id="seriesTitle"></h1>
         <div class="controls">
             <div class="control-group">
                 <label>Temporada:</label>
-                <select id="season">
-                    <option value="1">Temporada 1</option>
-                    <option value="2">Temporada 2</option>
-                    <option value="3">Temporada 3</option>
-                    <option value="4">Temporada 4</option>
-                    <option value="5">Temporada 5</option>
-                    <option value="6">Temporada 6</option>
-                    <option value="7">Temporada 7</option>
-                </select>
+                <select id="season"></select>
                 <label>Episódio:</label>
                 <select id="episode"></select>
                 <button id="loadEpisodeBtn">▶ Carregar</button>
@@ -88,114 +69,50 @@
             <div class="episode-grid" id="episodeGrid"></div>
         </div>
     </div>
-    
     <script>
-        // BANCO DE DADOS FINAL, COM TÍTULOS E SERVIDORES MAPEADOS
-        const the100Database = {
-            1: { 
-                episodes: [
-                    { title: "Piloto" }, { title: "Habilidades de Terra" }, { title: "Mata de Terra" },
-                    { title: "A Lei de Murphy" }, { title: "Último Brilho do Crepúsculo" }, { title: "Guardião de Sua Irmã" },
-                    { title: "Conteúdo Sob Pressão" }, { title: "Dia de Viagem" }, { title: "Dia da Unidade" },
-                    { title: "Eu Me Tornei Morte" }, { title: "A Calma" }, { title: "Nós Somos Rasteiras (Parte 1)" },
-                    { title: "Nós Somos Rasteiras (Parte 2)" }
-                ].map(ep => ({ ...ep, server: 'RCServer09' }))
-            },
-            2: { 
-                episodes: [
-                    { title: "O 48" }, { title: "Tempo Inclemente" }, { title: "Repercussão" },
-                    { title: "Festas Pelo Aniversário" }, { title: "Testes em Humanos" }, { title: "Névoa da Guerra" },
-                    { title: "Longo em um Abismo" }, { title: "Spacewalker" }, { title: "Lembra de Mim" },
-                    { title: "Sobrevivência do Mais Apto" }, { title: "Golpe de Misericórdia" }, { title: "Rubicão" },
-                    { title: "Ressurreição" }, { title: "Guarda-costas de Mentiras" }, { title: "Sangue Deve Ter Sangue (Parte 1)" },
-                    { title: "Sangue Deve Ter Sangue (Parte 2)" }
-                ].map(ep => ({ ...ep, server: 'RCServer09' }))
-            },
-            3: { 
-                episodes: [
-                    { title: "Wanheda (Parte 1)" }, { title: "Wanheda (Parte 2)" }, { title: "Aquele Que Aqui Entraram" },
-                    { title: "Cuidem Bem Os Tronos" }, { title: "Hakeldama" }, { title: "Colheita Amarga" }, { title: "Treze" },
-                    { title: "Termos e Condições" }, { title: "Roubando o Fogo" }, { title: "Caído" }, { title: "Nunca Mais" },
-                    { title: "Demônios" }, { title: "Junte-se A Nós ou Morra" }, { title: "Céu Vermelho de Manhã" },
-                    { title: "Instanciação Perversa (Parte 1)" }, { title: "Instanciação Perversa (Parte 2)" }
-                ].map(ep => ({ ...ep, server: 'RCServer10' }))
-            },
-            4: { 
-                episodes: [
-                    ...Array.from({length: 10}, (v, i) => ({ server: 'RCServer11', title: ["Ecos", "Pesado Mente a Coroa", "O Quatro Cavaleiro", "Uma Mentira Guardada", "A Caixa de Material Inflamável", "Nós Ressurgremos", "Me Dê Abrigo", "O Complexo de Deus", "DNR", "Morram Todos, Morram Felizes"][i] })),
-                    ...Array.from({length: 3}, (v, i) => ({ server: 'RCServer12', title: ["O Outro Lado", "O Escolhido", "Praimfaya"][i] }))
-                ] 
-            },
-            5: { 
-                episodes: [
-                    { title: "Éden" }, { title: "A Rainha Vermelha" }, { title: "Gigantes Adormecidos" }, { title: "A Caixa de Pandora" },
-                    { title: "Areias Movediças" }, { title: "Feridas de Saída" }, { title: "Perdas Aceitáveis" },
-                    { title: "Como Chegamos à Paz" }, { title: "Sic Semper Tyrannis" }, { title: "A Vontade dos Guerreiros" },
-                    { title: "O Ano Sombrio" }, { title: "Dâmocles (Parte 1)" }, { title: "Dâmocles (Parte 2)" }
-                ].map(ep => ({ ...ep, server: 'RCServer13' }))
-            },
-            6: { 
-                episodes: [
-                    { title: "Santuário" }, { title: "Nascer do Sol Vermelho" }, { title: "Os Filhos de Gabriel" }, { title: "O Rosto Atrás do Vidro" },
-                    { title: "O Evangelho de Josefina" }, { title: "Memento Mori" }, { title: "Deixa Pra Lá" }, { title: "O Velho e a Anomalia" },
-                    { title: "O Que Você Leva Com Você" }, { title: "Matryoshka" }, { title: "Cinzas às Cinzas" }, { title: "Protocolo de Ajuste" },
-                    { title: "O Sangue do Santuário" }
-                ].map(ep => ({ ...ep, server: 'RCServer06' }))
-            },
-            7: { 
-                episodes: [
-                    ...Array.from({length: 8}, (v, i) => ({ server: 'RCServer14', title: ["Vindo das Cinzas", "O Jardim", "Falsos Deuses", "Hesperides", "Bem-vindo Ao Bardo", "Nakara", "O Gambito da Rainha", "Anaconda"][i] })),
-                    ...Array.from({length: 6}, (v, i) => ({ server: 'RCServer12', title: ["O Rebanho", "Um Pequeno Sacrifício", "Etherea", "O Estranho", "Gigante de Sangue", "Uma Espécie De Regresso A Casa"][i] })),
-                    ...Array.from({length: 2}, (v, i) => ({ server: 'RCServer04', title: ["A Morte De Laiz", "A Última Guerra"][i] }))
-                ]
-            }
-        };
-
-        for (const season in the100Database) {
-            the100Database[season].episodes.forEach((ep_data, index) => {
-                ep_data.ep = index + 1;
-            });
-        }
-
+        let currentSeriesData = {};
         function generateEpisodeCode(season, episode) {
             const seasonStr = season.toString().padStart(2, '0');
             const episodeStr = episode.toString().padStart(2, '0');
             return `THE100S${seasonStr}EP${episodeStr}`;
         }
-
+        function updateSeasonOptions(database) {
+            const seasonSelect = document.getElementById('season');
+            seasonSelect.innerHTML = '';
+            Object.keys(database).forEach(seasonNum => {
+                const option = document.createElement('option');
+                option.value = seasonNum;
+                option.textContent = `Temporada ${seasonNum}`;
+                seasonSelect.appendChild(option);
+            });
+        }
         function updateEpisodes() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const episodeSelect = document.getElementById('episode');
-            const episodes = the100Database[seasonNum].episodes;
-            
+            const episodes = currentSeriesData.database[seasonNum].episodes;
             episodeSelect.innerHTML = '';
             episodes.forEach(ep_data => {
                 const option = document.createElement('option');
                 option.value = ep_data.ep;
-                // MUDANÇA: Exibe o nome do episódio no menu dropdown
                 option.textContent = `Episódio ${ep_data.ep}: ${ep_data.title}`;
                 episodeSelect.appendChild(option);
             });
             updateSeasonInfo();
         }
-
         function updateSeasonInfo() {
             const seasonNum = parseInt(document.getElementById('season').value);
-            const maxEpisodes = the100Database[seasonNum].episodes.length;
+            const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
             document.getElementById('seasonInfo').textContent = `Temporada ${seasonNum} - ${maxEpisodes} Episódios`;
         }
-        
         function updateEpisodeGrid() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const currentEpisode = parseInt(document.getElementById('episode').value);
-            const episodes = the100Database[seasonNum].episodes;
+            const episodes = currentSeriesData.database[seasonNum].episodes;
             const gridContainer = document.getElementById('episodeGrid');
-
             gridContainer.innerHTML = '';
             episodes.forEach(ep_data => {
                 const episodeDiv = document.createElement('div');
                 episodeDiv.className = 'episode-item';
-                // MUDANÇA: Adiciona o título completo ao passar o mouse
                 episodeDiv.title = ep_data.title;
                 episodeDiv.textContent = `EP ${ep_data.ep}`;
                 if (ep_data.ep === currentEpisode) {
@@ -208,37 +125,27 @@
                 gridContainer.appendChild(episodeDiv);
             });
         }
-        
         function loadEpisode() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const episodeNum = parseInt(document.getElementById('episode').value);
-            
-            const episodeData = the100Database[seasonNum].episodes.find(e => e.ep == episodeNum);
-
-            if (!episodeData) { return; }
-
+            const episodeData = currentSeriesData.database[seasonNum].episodes.find(e => e.ep == episodeNum);
+            if (!episodeData) return;
             const serverName = episodeData.server;
             const episodeCode = generateEpisodeCode(seasonNum, episodeNum);
             const newUrl = `//redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
-            
             document.getElementById('playerFrame').src = newUrl;
-            
-            // MUDANÇA: Exibe o nome do episódio no título acima do player
             document.getElementById('currentEpisode').textContent = `T${seasonNum}:E${episodeNum} - ${episodeData.title}`;
-            
             updateEpisodeGrid();
         }
-        
         function nextEpisode() {
             const seasonNum = parseInt(document.getElementById('season').value);
             let episodeNum = parseInt(document.getElementById('episode').value);
-            const maxEpisodes = the100Database[seasonNum].episodes.length;
-            
+            const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
             if (episodeNum < maxEpisodes) {
                 document.getElementById('episode').value = episodeNum + 1;
                 loadEpisode();
-            } else if (seasonNum < Object.keys(the100Database).length) {
-                document.getElementById('season').value = seasonNum + 1;
+            } else if (seasonNum < Object.keys(currentSeriesData.database).length) {
+                document.getElementById('season').value = parseInt(seasonNum) + 1;
                 updateEpisodes();
                 document.getElementById('episode').value = 1;
                 loadEpisode();
@@ -246,11 +153,9 @@
                 alert('Você chegou ao final da série! 🎉');
             }
         }
-        
         function previousEpisode() {
             const seasonNum = parseInt(document.getElementById('season').value);
             let episodeNum = parseInt(document.getElementById('episode').value);
-            
             if (episodeNum > 1) {
                 document.getElementById('episode').value = episodeNum - 1;
                 loadEpisode();
@@ -258,34 +163,50 @@
                 const prevSeason = seasonNum - 1;
                 document.getElementById('season').value = prevSeason;
                 updateEpisodes();
-                const maxEpisodesPrevSeason = the100Database[prevSeason].episodes.length;
+                const maxEpisodesPrevSeason = currentSeriesData.database[prevSeason].episodes.length;
                 document.getElementById('episode').value = maxEpisodesPrevSeason;
                 loadEpisode();
             } else {
                 alert('Você está no primeiro episódio da série! 🏁');
             }
         }
-        
         document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const serieId = params.get('serie');
+            if (serieId) {
+                const script = document.createElement('script');
+                script.src = `data/${serieId}.js`;
+                script.onload = () => {
+                    currentSeriesData = window.seriesData;
+                    document.title = `${currentSeriesData.title} - Player de Episódios`;
+                    document.getElementById('seriesTitle').textContent = `${currentSeriesData.title} (Legendado)`;
+                    document.getElementById('player-container-main').style.display = 'block';
+                    setupPlayer();
+                };
+                script.onerror = () => { document.body.innerHTML = `<h1>Erro: Não foi possível carregar os dados para a série "${serieId}". Verifique se o arquivo "data/${serieId}.js" existe.</h1>`; };
+                document.body.appendChild(script);
+            } else {
+                document.body.innerHTML = '<h1>Nenhuma série selecionada. Volte para o menu principal.</h1>';
+            }
+        });
+        function setupPlayer() {
+            updateSeasonOptions(currentSeriesData.database);
             document.getElementById('season').value = 1;
             document.getElementById('season').addEventListener('change', () => {
                 updateEpisodes();
                 document.getElementById('episode').value = 1;
                 loadEpisode();
             });
-
             document.getElementById('loadEpisodeBtn').addEventListener('click', loadEpisode);
             document.getElementById('prevEpisodeBtn').addEventListener('click', previousEpisode);
             document.getElementById('nextEpisodeBtn').addEventListener('click', nextEpisode);
-            
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'ArrowRight') nextEpisode(); 
                 else if (event.key === 'ArrowLeft') previousEpisode();
             });
-
             updateEpisodes();
             loadEpisode();
-        });
+        }
     </script>
 </body>
 </html>
