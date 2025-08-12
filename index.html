@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player de Séries</title>
+    <title>The 100 - Player de Episódios</title>
     <style>
         * {
             margin: 0;
@@ -53,7 +53,7 @@
             min-width: 80px;
         }
         
-        select, input {
+        select {
             padding: 10px;
             border: none;
             border-radius: 8px;
@@ -79,6 +79,19 @@
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            padding: 8px 16px;
+            font-size: 12px;
         }
         
         .player-container {
@@ -110,25 +123,41 @@
             backdrop-filter: blur(10px);
         }
         
+        .episode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
         .episode-item {
             background: rgba(255,255,255,0.1);
-            margin: 5px 0;
-            padding: 10px 15px;
+            padding: 12px 8px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
+            text-align: center;
+            font-size: 14px;
         }
         
         .episode-item:hover {
             background: rgba(255,255,255,0.2);
             border-left-color: #ffd700;
-            transform: translateX(5px);
+            transform: translateY(-2px);
         }
         
         .episode-item.active {
             background: rgba(255,215,0,0.2);
             border-left-color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .season-info {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-size: 1.1em;
         }
         
         @media (max-width: 768px) {
@@ -145,44 +174,41 @@
                 width: 100%;
                 height: 250px;
             }
+            
+            .episode-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Player de Séries</h1>
+        <h1>🎬 The 100 - Player de Episódios</h1>
         
         <div class="controls">
             <div class="control-group">
-                <label>Série:</label>
-                <input type="text" id="seriesName" placeholder="Nome da série" value="The 100">
-                
                 <label>Temporada:</label>
                 <select id="season">
-                    <option value="01">Temporada 1</option>
-                    <option value="02">Temporada 2</option>
-                    <option value="03">Temporada 3</option>
-                    <option value="04">Temporada 4</option>
-                    <option value="05" selected>Temporada 5</option>
-                    <option value="06">Temporada 6</option>
-                    <option value="07">Temporada 7</option>
+                    <option value="1">Temporada 1 (13 episódios)</option>
+                    <option value="2">Temporada 2 (16 episódios)</option>
+                    <option value="3">Temporada 3 (16 episódios)</option>
+                    <option value="4">Temporada 4 (13 episódios)</option>
+                    <option value="5" selected>Temporada 5 (13 episódios)</option>
+                    <option value="6">Temporada 6 (13 episódios)</option>
+                    <option value="7">Temporada 7 (16 episódios)</option>
                 </select>
                 
                 <label>Episódio:</label>
                 <select id="episode">
-                    <option value="01">Episódio 1</option>
-                    <option value="02">Episódio 2</option>
-                    <option value="03">Episódio 3</option>
-                    <option value="04">Episódio 4</option>
-                    <option value="05">Episódio 5</option>
-                    <option value="06">Episódio 6</option>
-                    <option value="07">Episódio 7</option>
-                    <option value="08" selected>Episódio 8</option>
-                    <option value="09">Episódio 9</option>
-                    <option value="10">Episódio 10</option>
+                    <option value="8" selected>Episódio 8</option>
                 </select>
                 
                 <button onclick="loadEpisode()">▶️ Carregar Episódio</button>
+            </div>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="previousEpisode()">⏮️ Anterior</button>
+                <button class="nav-btn" onclick="nextEpisode()">⏭️ Próximo</button>
             </div>
         </div>
         
@@ -203,114 +229,150 @@
         </div>
         
         <div class="episode-list">
-            <h3>🗂️ Lista de Episódios</h3>
-            <div id="episodeList"></div>
+            <div class="season-info" id="seasonInfo">
+                Temporada 5 - 13 Episódios
+            </div>
+            <div class="episode-grid" id="episodeGrid"></div>
         </div>
     </div>
     
     <script>
-        // Configurações da série
-        const seriesConfig = {
-            'The 100': {
-                code: 'THE100',
-                seasons: {
-                    '01': 13,
-                    '02': 16,
-                    '03': 16,
-                    '04': 13,
-                    '05': 13,
-                    '06': 13,
-                    '07': 16
-                }
-            }
-            // Você pode adicionar mais séries aqui
+        // 🎯 BASE DE DADOS COMPLETA DO THE 100
+        const the100Database = {
+            1: { episodes: 13 },
+            2: { episodes: 16 },
+            3: { episodes: 16 },
+            4: { episodes: 13 },
+            5: { episodes: 13 },
+            6: { episodes: 13 },
+            7: { episodes: 16 }
         };
         
-        function updateEpisodeOptions() {
-            const seriesName = document.getElementById('seriesName').value;
-            const season = document.getElementById('season').value;
+        function generateEpisodeCode(season, episode) {
+            const seasonStr = season.toString().padStart(2, '0');
+            const episodeStr = episode.toString().padStart(2, '0');
+            return `THE100S${seasonStr}EP${episodeStr}`;
+        }
+        
+        function updateEpisodes() {
+            const seasonNum = parseInt(document.getElementById('season').value);
             const episodeSelect = document.getElementById('episode');
+            const maxEpisodes = the100Database[seasonNum].episodes;
             
-            // Limpa opções atuais
             episodeSelect.innerHTML = '';
             
-            // Se a série estiver configurada, use o número correto de episódios
-            let maxEpisodes = 16; // padrão
-            if (seriesConfig[seriesName] && seriesConfig[seriesName].seasons[season]) {
-                maxEpisodes = seriesConfig[seriesName].seasons[season];
-            }
-            
-            // Adiciona opções de episódios
             for (let i = 1; i <= maxEpisodes; i++) {
                 const option = document.createElement('option');
-                const episodeNum = i.toString().padStart(2, '0');
-                option.value = episodeNum;
+                option.value = i;
                 option.textContent = `Episódio ${i}`;
                 episodeSelect.appendChild(option);
             }
+            
+            // Seleciona o primeiro episódio por padrão
+            episodeSelect.value = 1;
+            updateSeasonInfo();
+            updateEpisodeGrid();
         }
         
-        function generateEpisodeCode(seriesName, season, episode) {
-            // Remove espaços e caracteres especiais do nome da série
-            const cleanName = seriesName.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            return `${cleanName}S${season}EP${episode}`;
+        function updateSeasonInfo() {
+            const seasonNum = parseInt(document.getElementById('season').value);
+            const maxEpisodes = the100Database[seasonNum].episodes;
+            document.getElementById('seasonInfo').textContent = 
+                `Temporada ${seasonNum} - ${maxEpisodes} Episódios`;
         }
         
-        function loadEpisode() {
-            const seriesName = document.getElementById('seriesName').value;
-            const season = document.getElementById('season').value;
-            const episode = document.getElementById('episode').value;
+        function updateEpisodeGrid() {
+            const seasonNum = parseInt(document.getElementById('season').value);
+            const currentEpisode = parseInt(document.getElementById('episode').value);
+            const maxEpisodes = the100Database[seasonNum].episodes;
+            const gridContainer = document.getElementById('episodeGrid');
             
-            const episodeCode = generateEpisodeCode(seriesName, season, episode);
-            const newUrl = `//redecanais.gd/player3/server.php?server=RCServer13&subfolder=ondemand&vid=${episodeCode}`;
-            
-            document.getElementById('playerFrame').src = newUrl;
-            document.getElementById('currentEpisode').textContent = 
-                `${seriesName} - Temporada ${parseInt(season)}, Episódio ${parseInt(episode)}`;
-            
-            updateEpisodeList();
-        }
-        
-        function updateEpisodeList() {
-            const seriesName = document.getElementById('seriesName').value;
-            const currentSeason = document.getElementById('season').value;
-            const currentEpisode = document.getElementById('episode').value;
-            const listContainer = document.getElementById('episodeList');
-            
-            listContainer.innerHTML = '';
-            
-            // Número de episódios para a temporada atual
-            let maxEpisodes = 16;
-            if (seriesConfig[seriesName] && seriesConfig[seriesName].seasons[currentSeason]) {
-                maxEpisodes = seriesConfig[seriesName].seasons[currentSeason];
-            }
+            gridContainer.innerHTML = '';
             
             for (let i = 1; i <= maxEpisodes; i++) {
-                const episodeNum = i.toString().padStart(2, '0');
                 const episodeDiv = document.createElement('div');
                 episodeDiv.className = 'episode-item';
-                episodeDiv.textContent = `Episódio ${i}`;
+                episodeDiv.textContent = `EP ${i}`;
                 
-                if (episodeNum === currentEpisode) {
+                if (i === currentEpisode) {
                     episodeDiv.classList.add('active');
                 }
                 
                 episodeDiv.onclick = () => {
-                    document.getElementById('episode').value = episodeNum;
+                    document.getElementById('episode').value = i;
                     loadEpisode();
                 };
                 
-                listContainer.appendChild(episodeDiv);
+                gridContainer.appendChild(episodeDiv);
+            }
+        }
+        
+        function loadEpisode() {
+            const seasonNum = parseInt(document.getElementById('season').value);
+            const episodeNum = parseInt(document.getElementById('episode').value);
+            
+            const episodeCode = generateEpisodeCode(seasonNum, episodeNum);
+            const newUrl = `//redecanais.gd/player3/server.php?server=RCServer13&subfolder=ondemand&vid=${episodeCode}`;
+            
+            document.getElementById('playerFrame').src = newUrl;
+            document.getElementById('currentEpisode').textContent = 
+                `The 100 - Temporada ${seasonNum}, Episódio ${episodeNum}`;
+            
+            updateEpisodeGrid();
+        }
+        
+        function nextEpisode() {
+            const seasonNum = parseInt(document.getElementById('season').value);
+            const episodeNum = parseInt(document.getElementById('episode').value);
+            const maxEpisodes = the100Database[seasonNum].episodes;
+            
+            if (episodeNum < maxEpisodes) {
+                document.getElementById('episode').value = episodeNum + 1;
+                loadEpisode();
+            } else if (seasonNum < 7) {
+                // Próxima temporada, episódio 1
+                document.getElementById('season').value = seasonNum + 1;
+                updateEpisodes();
+                loadEpisode();
+            } else {
+                alert('Você chegou ao final da série! 🎉');
+            }
+        }
+        
+        function previousEpisode() {
+            const seasonNum = parseInt(document.getElementById('season').value);
+            const episodeNum = parseInt(document.getElementById('episode').value);
+            
+            if (episodeNum > 1) {
+                document.getElementById('episode').value = episodeNum - 1;
+                loadEpisode();
+            } else if (seasonNum > 1) {
+                // Temporada anterior, último episódio
+                const prevSeason = seasonNum - 1;
+                const maxEpisodesPrevSeason = the100Database[prevSeason].episodes;
+                document.getElementById('season').value = prevSeason;
+                updateEpisodes();
+                document.getElementById('episode').value = maxEpisodesPrevSeason;
+                loadEpisode();
+            } else {
+                alert('Você está no primeiro episódio da série! 🏁');
             }
         }
         
         // Event listeners
-        document.getElementById('season').onchange = updateEpisodeOptions;
-        document.getElementById('seriesName').onchange = updateEpisodeOptions;
+        document.getElementById('season').onchange = updateEpisodes;
+        
+        // Teclas de atalho
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight') {
+                nextEpisode();
+            } else if (event.key === 'ArrowLeft') {
+                previousEpisode();
+            }
+        });
         
         // Inicializa a página
-        updateEpisodeOptions();
-        updateEpisodeList();
+        updateEpisodes();
     </script>
 </body>
 </html>
