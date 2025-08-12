@@ -6,31 +6,110 @@
     <title>Minhas Séries</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0f1e; color: #e0e6f1; margin: 0; padding: 40px 20px; text-align: center; }
-        .header { margin-bottom: 50px; }
-        .header h1 { font-size: 2.5em; margin: 0; }
-        .header p { font-size: 1.2em; color: #8892b0; }
-        .series-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
-        .series-card { background-color: #1c233a; border: 1px solid rgba(136, 146, 176, 0.2); border-radius: 12px; padding: 20px; text-decoration: none; color: #e0e6f1; transition: all 0.2s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 150px; }
-        .series-card:hover { transform: translateY(-5px); border-color: #00aaff; }
-        .series-card h2 { margin: 0; font-size: 1.5em; }
-        .series-card.placeholder { background-color: transparent; border-style: dashed; color: #8892b0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            
+            /* --- MUDANÇA 1: PLANO DE FUNDO COM IMAGEM E SOBREPOSIÇÃO --- */
+            background-color: #0a0f1e; /* Cor de base caso a imagem não carregue */
+            background-image: 
+                linear-gradient(rgba(10, 15, 30, 0.9), rgba(10, 15, 30, 1)), /* Sobreposição escura */
+                url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop'); /* Imagem de fundo */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Efeito parallax */
+            
+            color: #e0e6f1;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            font-weight: 900; /* Mais pesado para destaque */
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #8892b0;
+        }
+
+        .series-grid {
+            display: grid;
+            /* Grid responsivo que se ajusta ao tamanho da tela */
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- MUDANÇA 2: O NOVO ESTILO DOS CARDS COM PÔSTERES --- */
+        .series-card {
+            text-decoration: none;
+            color: #e0e6f1;
+            border-radius: 12px;
+            overflow: hidden; /* Garante que a imagem não saia fora das bordas arredondadas */
+            position: relative; /* Essencial para posicionar o título sobre a imagem */
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid transparent;
+        }
+
+        .series-card:hover {
+            transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
+            border-color: #00aaff;
+        }
+
+        .series-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Garante que a imagem preencha o card sem distorcer */
+            display: block; /* Remove espaço extra embaixo da imagem */
+        }
+
+        .card-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 15px 15px 15px; /* Mais padding no topo para o gradiente respirar */
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); /* Gradiente para o texto ficar legível */
+            text-align: left;
+        }
+
+        .card-title h2 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
+
     <div class="header">
         <h1>Minha Coleção</h1>
         <p>Selecione uma série para assistir</p>
     </div>
+
     <div class="series-grid">
+        
         <a href="player.html?serie=the100" class="series-card">
-            <h2>The 100</h2>
+            <img src="https://image.tmdb.org/t/p/w500/wcaDIAG1QAWctrcCrhbc5DShr7W.jpg" alt="Pôster da série The 100">
+            <div class="card-title">
+                <h2>The 100</h2>
+            </div>
         </a>
-        <a href="#" class="series-card placeholder">
-            <h2>Sua Próxima Série</h2>
-        </a>
-    </div>
+
+        </div>
+
 </body>
 </html>
