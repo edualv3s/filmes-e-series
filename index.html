@@ -10,195 +10,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* 2. Definindo variáveis de design para fácil customização */
         :root {
-            --background-dark: #0a0f1e; /* Azul muito escuro, quase preto */
-            --background-light: #1c233a; /* Painel um pouco mais claro */
-            --text-primary: #e0e6f1;     /* Branco suave */
-            --text-secondary: #8892b0;   /* Cinza azulado para textos secundários */
-            --accent-color: #00aaff;     /* Azul neon para destaques */
-            --accent-color-darker: #0088cc; /* Azul neon mais escuro para hover */
-            --border-color: rgba(136, 146, 176, 0.2); /* Cor da borda sutil */
+            --background-dark: #0a0f1e;
+            --background-light: #1c233a;
+            --text-primary: #e0e6f1;
+            --text-secondary: #8892b0;
+            --accent-color: #00aaff;
+            --accent-color-darker: #0088cc;
+            --border-color: rgba(136, 146, 176, 0.2);
             --font-family: 'Inter', sans-serif;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: var(--font-family);
-            background: var(--background-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 40px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.2em;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-        }
-
-        h1::before {
-            content: '▶';
-            margin-right: 15px;
-            color: var(--accent-color);
-            font-size: 0.8em;
-        }
-        
-        .controls, .player-container, .episode-list {
-            background: var(--background-light);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .control-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        label {
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 0.9em;
-        }
-        
-        select, button {
-            background-color: #2a3452;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-family: var(--font-family);
-            font-size: 1em;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-
-        select:focus, button:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.2);
-        }
-        
-        button {
-            background: var(--accent-color);
-            color: #fff;
-            font-weight: bold;
-            border-color: var(--accent-color);
-        }
-        
-        button:hover {
-            background: var(--accent-color-darker);
-            border-color: var(--accent-color-darker);
-            transform: translateY(-2px);
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .nav-btn {
-            background: #3b4668;
-            border-color: #3b4668;
-            color: var(--text-secondary);
-        }
-        .nav-btn:hover {
-            background: #4c5a81;
-            border-color: #4c5a81;
-            color: var(--text-primary);
-        }
-        
-        .player-container {
-            padding: 15px;
-        }
-        
-        .current-episode {
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            font-weight: 500;
-            color: var(--text-primary);
-            text-align: left;
-        }
-        
-        iframe {
-            width: 100%;
-            border-radius: 8px;
-            border: none;
-            background-color: #000;
-        }
-
-        /* 3. Re-estilizando a lista de episódios para ser um scroll horizontal */
-        .season-info {
-            text-align: left;
-            margin-bottom: 15px;
-            color: var(--text-secondary);
-            font-size: 1.1em;
-        }
-
-        .episode-grid {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto; /* A mágica do scroll horizontal */
-            padding-bottom: 15px; /* Espaço para a barra de scroll não colar */
-            -webkit-overflow-scrolling: touch; /* Melhora a experiência em mobile */
-        }
-        
-        /* Estilo da barra de scroll (opcional, mas elegante) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-family); background: var(--background-dark); color: var(--text-primary); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding-top: 40px; }
+        .container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 40px; font-size: 2.2em; font-weight: 700; letter-spacing: 1px; color: var(--text-primary); }
+        h1::before { content: '▶'; margin-right: 15px; color: var(--accent-color); font-size: 0.8em; }
+        .controls, .player-container, .episode-list { background: var(--background-light); border-radius: 12px; padding: 25px; margin-bottom: 30px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .control-group { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        label { font-weight: 500; color: var(--text-secondary); font-size: 0.9em; }
+        select, button { background-color: #2a3452; color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; font-family: var(--font-family); font-size: 1em; transition: all 0.2s ease-in-out; cursor: pointer; }
+        select:focus, button:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.2); }
+        button { background: var(--accent-color); color: #fff; font-weight: bold; border-color: var(--accent-color); }
+        button:hover { background: var(--accent-color-darker); border-color: var(--accent-color-darker); transform: translateY(-2px); }
+        .nav-buttons { display: flex; gap: 15px; margin-top: 20px; }
+        .nav-btn { background: #3b4668; border-color: #3b4668; color: var(--text-secondary); }
+        .nav-btn:hover { background: #4c5a81; border-color: #4c5a81; color: var(--text-primary); }
+        .player-container { padding: 15px; }
+        .current-episode { margin-bottom: 15px; font-size: 1.2em; font-weight: 500; color: var(--text-primary); text-align: left; }
+        iframe { width: 100%; border-radius: 8px; border: none; background-color: #000; }
+        .season-info { text-align: left; margin-bottom: 15px; color: var(--text-secondary); font-size: 1.1em; }
+        .episode-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
         .episode-grid::-webkit-scrollbar { height: 6px; }
         .episode-grid::-webkit-scrollbar-track { background: transparent; }
         .episode-grid::-webkit-scrollbar-thumb { background: #3b4668; border-radius: 3px; }
         .episode-grid::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
-
-        .episode-item {
-            flex-shrink: 0; /* Impede que os itens encolham */
-            background: #2a3452;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            border: 1px solid transparent;
-            text-align: center;
-            font-size: 0.9em;
-            color: var(--text-secondary);
-        }
-        
-        .episode-item:hover {
-            color: var(--text-primary);
-            background-color: #3b4668;
-            transform: translateY(-2px);
-        }
-        
-        .episode-item.active {
-            background: var(--accent-color);
-            color: #fff;
-            font-weight: bold;
-            border-color: var(--accent-color);
-        }
-        
+        .episode-item { flex-shrink: 0; background: #2a3452; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; border: 1px solid transparent; text-align: center; font-size: 0.9em; color: var(--text-secondary); }
+        .episode-item:hover { color: var(--text-primary); background-color: #3b4668; transform: translateY(-2px); }
+        .episode-item.active { background: var(--accent-color); color: #fff; font-weight: bold; border-color: var(--accent-color); }
         @media (max-width: 768px) {
             body { padding-top: 10px; }
             .control-group { flex-direction: column; align-items: stretch; }
@@ -242,25 +90,63 @@
     </div>
     
     <script>
-        // O JavaScript permanece exatamente o mesmo, pois a funcionalidade não muda.
-        // O CSS novo apenas aplica um novo "visual" aos elementos que o JS já controla.
+        // BANCO DE DADOS FINAL, COM TÍTULOS E SERVIDORES MAPEADOS
         const the100Database = {
-            1: { episodes: Array.from({length: 13}, () => ({ server: 'RCServer09' })) },
-            2: { episodes: Array.from({length: 16}, () => ({ server: 'RCServer09' })) },
-            3: { episodes: Array.from({length: 16}, () => ({ server: 'RCServer10' })) },
+            1: { 
+                episodes: [
+                    { title: "Piloto" }, { title: "Habilidades de Terra" }, { title: "Mata de Terra" },
+                    { title: "A Lei de Murphy" }, { title: "Último Brilho do Crepúsculo" }, { title: "Guardião de Sua Irmã" },
+                    { title: "Conteúdo Sob Pressão" }, { title: "Dia de Viagem" }, { title: "Dia da Unidade" },
+                    { title: "Eu Me Tornei Morte" }, { title: "A Calma" }, { title: "Nós Somos Rasteiras (Parte 1)" },
+                    { title: "Nós Somos Rasteiras (Parte 2)" }
+                ].map(ep => ({ ...ep, server: 'RCServer09' }))
+            },
+            2: { 
+                episodes: [
+                    { title: "O 48" }, { title: "Tempo Inclemente" }, { title: "Repercussão" },
+                    { title: "Festas Pelo Aniversário" }, { title: "Testes em Humanos" }, { title: "Névoa da Guerra" },
+                    { title: "Longo em um Abismo" }, { title: "Spacewalker" }, { title: "Lembra de Mim" },
+                    { title: "Sobrevivência do Mais Apto" }, { title: "Golpe de Misericórdia" }, { title: "Rubicão" },
+                    { title: "Ressurreição" }, { title: "Guarda-costas de Mentiras" }, { title: "Sangue Deve Ter Sangue (Parte 1)" },
+                    { title: "Sangue Deve Ter Sangue (Parte 2)" }
+                ].map(ep => ({ ...ep, server: 'RCServer09' }))
+            },
+            3: { 
+                episodes: [
+                    { title: "Wanheda (Parte 1)" }, { title: "Wanheda (Parte 2)" }, { title: "Aquele Que Aqui Entraram" },
+                    { title: "Cuidem Bem Os Tronos" }, { title: "Hakeldama" }, { title: "Colheita Amarga" }, { title: "Treze" },
+                    { title: "Termos e Condições" }, { title: "Roubando o Fogo" }, { title: "Caído" }, { title: "Nunca Mais" },
+                    { title: "Demônios" }, { title: "Junte-se A Nós ou Morra" }, { title: "Céu Vermelho de Manhã" },
+                    { title: "Instanciação Perversa (Parte 1)" }, { title: "Instanciação Perversa (Parte 2)" }
+                ].map(ep => ({ ...ep, server: 'RCServer10' }))
+            },
             4: { 
                 episodes: [
-                    ...Array.from({length: 10}, () => ({ server: 'RCServer11' })),
-                    ...Array.from({length: 3}, () => ({ server: 'RCServer12' }))
+                    ...Array.from({length: 10}, (v, i) => ({ server: 'RCServer11', title: ["Ecos", "Pesado Mente a Coroa", "O Quatro Cavaleiro", "Uma Mentira Guardada", "A Caixa de Material Inflamável", "Nós Ressurgremos", "Me Dê Abrigo", "O Complexo de Deus", "DNR", "Morram Todos, Morram Felizes"][i] })),
+                    ...Array.from({length: 3}, (v, i) => ({ server: 'RCServer12', title: ["O Outro Lado", "O Escolhido", "Praimfaya"][i] }))
                 ] 
             },
-            5: { episodes: Array.from({length: 13}, () => ({ server: 'RCServer13' })) },
-            6: { episodes: Array.from({length: 13}, () => ({ server: 'RCServer06' })) },
+            5: { 
+                episodes: [
+                    { title: "Éden" }, { title: "A Rainha Vermelha" }, { title: "Gigantes Adormecidos" }, { title: "A Caixa de Pandora" },
+                    { title: "Areias Movediças" }, { title: "Feridas de Saída" }, { title: "Perdas Aceitáveis" },
+                    { title: "Como Chegamos à Paz" }, { title: "Sic Semper Tyrannis" }, { title: "A Vontade dos Guerreiros" },
+                    { title: "O Ano Sombrio" }, { title: "Dâmocles (Parte 1)" }, { title: "Dâmocles (Parte 2)" }
+                ].map(ep => ({ ...ep, server: 'RCServer13' }))
+            },
+            6: { 
+                episodes: [
+                    { title: "Santuário" }, { title: "Nascer do Sol Vermelho" }, { title: "Os Filhos de Gabriel" }, { title: "O Rosto Atrás do Vidro" },
+                    { title: "O Evangelho de Josefina" }, { title: "Memento Mori" }, { title: "Deixa Pra Lá" }, { title: "O Velho e a Anomalia" },
+                    { title: "O Que Você Leva Com Você" }, { title: "Matryoshka" }, { title: "Cinzas às Cinzas" }, { title: "Protocolo de Ajuste" },
+                    { title: "O Sangue do Santuário" }
+                ].map(ep => ({ ...ep, server: 'RCServer06' }))
+            },
             7: { 
                 episodes: [
-                    ...Array.from({length: 8}, () => ({ server: 'RCServer14' })),
-                    ...Array.from({length: 6}, () => ({ server: 'RCServer12' })),
-                    ...Array.from({length: 2}, () => ({ server: 'RCServer04' }))
+                    ...Array.from({length: 8}, (v, i) => ({ server: 'RCServer14', title: ["Vindo das Cinzas", "O Jardim", "Falsos Deuses", "Hesperides", "Bem-vindo Ao Bardo", "Nakara", "O Gambito da Rainha", "Anaconda"][i] })),
+                    ...Array.from({length: 6}, (v, i) => ({ server: 'RCServer12', title: ["O Rebanho", "Um Pequeno Sacrifício", "Etherea", "O Estranho", "Gigante de Sangue", "Uma Espécie De Regresso A Casa"][i] })),
+                    ...Array.from({length: 2}, (v, i) => ({ server: 'RCServer04', title: ["A Morte De Laiz", "A Última Guerra"][i] }))
                 ]
             }
         };
@@ -286,7 +172,8 @@
             episodes.forEach(ep_data => {
                 const option = document.createElement('option');
                 option.value = ep_data.ep;
-                option.textContent = `Episódio ${ep_data.ep}`;
+                // MUDANÇA: Exibe o nome do episódio no menu dropdown
+                option.textContent = `Episódio ${ep_data.ep}: ${ep_data.title}`;
                 episodeSelect.appendChild(option);
             });
             updateSeasonInfo();
@@ -308,6 +195,8 @@
             episodes.forEach(ep_data => {
                 const episodeDiv = document.createElement('div');
                 episodeDiv.className = 'episode-item';
+                // MUDANÇA: Adiciona o título completo ao passar o mouse
+                episodeDiv.title = ep_data.title;
                 episodeDiv.textContent = `EP ${ep_data.ep}`;
                 if (ep_data.ep === currentEpisode) {
                     episodeDiv.classList.add('active');
@@ -326,11 +215,7 @@
             
             const episodeData = the100Database[seasonNum].episodes.find(e => e.ep == episodeNum);
 
-            if (!episodeData) {
-                console.error('Erro: Dados do episódio não encontrados!');
-                alert('Erro: Dados do episódio não encontrados no banco de dados interno.');
-                return;
-            }
+            if (!episodeData) { return; }
 
             const serverName = episodeData.server;
             const episodeCode = generateEpisodeCode(seasonNum, episodeNum);
@@ -338,7 +223,8 @@
             
             document.getElementById('playerFrame').src = newUrl;
             
-            document.getElementById('currentEpisode').textContent = `The 100 (Legendado) - Temporada ${seasonNum}, Episódio ${episodeNum}`;
+            // MUDANÇA: Exibe o nome do episódio no título acima do player
+            document.getElementById('currentEpisode').textContent = `T${seasonNum}:E${episodeNum} - ${episodeData.title}`;
             
             updateEpisodeGrid();
         }
