@@ -113,6 +113,7 @@
             border-radius: 10px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.4);
             max-width: 100%;
+            border: none; /* Adicionado para remover qualquer borda padrão */
         }
         
         .episode-list {
@@ -193,33 +194,31 @@
                     <option value="2">Temporada 2 (16 episódios)</option>
                     <option value="3">Temporada 3 (16 episódios)</option>
                     <option value="4">Temporada 4 (13 episódios)</option>
-                    <option value="5" selected>Temporada 5 (13 episódios)</option>
+                    <option value="5">Temporada 5 (13 episódios)</option>
                     <option value="6">Temporada 6 (13 episódios)</option>
                     <option value="7">Temporada 7 (16 episódios)</option>
                 </select>
                 
                 <label>Episódio:</label>
                 <select id="episode">
-                    <option value="8" selected>Episódio 8</option>
-                </select>
+                    </select>
                 
-                <button onclick="loadEpisode()">▶️ Carregar Episódio</button>
+                <button id="loadEpisodeBtn">▶️ Carregar Episódio</button>
             </div>
             
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="previousEpisode()">⏮️ Anterior</button>
-                <button class="nav-btn" onclick="nextEpisode()">⏭️ Próximo</button>
+                 <button id="prevEpisodeBtn" class="nav-btn">⏮️ Anterior</button>
+                <button id="nextEpisodeBtn" class="nav-btn">⏭️ Próximo</button>
             </div>
         </div>
         
         <div class="player-container">
             <div class="current-episode" id="currentEpisode">
-                The 100 - Temporada 5, Episódio 8
+                Selecione um episódio para começar
             </div>
             
             <iframe id="playerFrame" 
-                    src="//redecanais.gd/player3/server.php?server=RCServer13&subfolder=ondemand&vid=THE100S05EP08" 
-                    frameborder="0" 
+                    src="about:blank" 
                     height="400" 
                     width="640" 
                     scrolling="no"
@@ -229,9 +228,7 @@
         </div>
         
         <div class="episode-list">
-            <div class="season-info" id="seasonInfo">
-                Temporada 5 - 13 Episódios
-            </div>
+            <div class="season-info" id="seasonInfo"></div>
             <div class="episode-grid" id="episodeGrid"></div>
         </div>
     </div>
@@ -268,8 +265,7 @@
                 episodeSelect.appendChild(option);
             }
             
-            // Seleciona o primeiro episódio por padrão
-            episodeSelect.value = 1;
+            episodeSelect.value = 1; // Sempre redefine para o episódio 1 ao mudar de temporada
             updateSeasonInfo();
             updateEpisodeGrid();
         }
@@ -329,11 +325,10 @@
             if (episodeNum < maxEpisodes) {
                 document.getElementById('episode').value = episodeNum + 1;
                 loadEpisode();
-            } else if (seasonNum < 7) {
-                // Próxima temporada, episódio 1
+            } else if (seasonNum < Object.keys(the100Database).length) { // Checagem dinâmica da última temporada
                 document.getElementById('season').value = seasonNum + 1;
-                updateEpisodes();
-                loadEpisode();
+                updateEpisodes(); // Atualiza os controles para a nova temporada
+                loadEpisode();    // Carrega o primeiro episódio da nova temporada
             } else {
                 alert('Você chegou ao final da série! 🎉');
             }
@@ -347,32 +342,47 @@
                 document.getElementById('episode').value = episodeNum - 1;
                 loadEpisode();
             } else if (seasonNum > 1) {
-                // Temporada anterior, último episódio
                 const prevSeason = seasonNum - 1;
-                const maxEpisodesPrevSeason = the100Database[prevSeason].episodes;
                 document.getElementById('season').value = prevSeason;
-                updateEpisodes();
+                updateEpisodes(); // Atualiza os controles para a temporada anterior
+                
+                const maxEpisodesPrevSeason = the100Database[prevSeason].episodes;
                 document.getElementById('episode').value = maxEpisodesPrevSeason;
-                loadEpisode();
+                loadEpisode(); // Carrega o último episódio da temporada anterior
             } else {
                 alert('Você está no primeiro episódio da série! 🏁');
             }
         }
         
-        // Event listeners
-        document.getElementById('season').onchange = updateEpisodes;
-        
-        // Teclas de atalho
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowRight') {
-                nextEpisode();
-            } else if (event.key === 'ArrowLeft') {
-                previousEpisode();
-            }
+        // --- INICIALIZAÇÃO E EVENTOS ---
+        // Espera o HTML ser completamente carregado antes de executar o script
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Centralizando os eventos (melhor prática)
+            document.getElementById('season').addEventListener('change', () => {
+                updateEpisodes(); // Atualiza os controles
+                loadEpisode();    // Carrega o primeiro episódio da nova temporada selecionada
+            });
+            document.getElementById('loadEpisodeBtn').addEventListener('click', loadEpisode);
+            document.getElementById('prevEpisodeBtn').addEventListener('click', previousEpisode);
+            document.getElementById('nextEpisodeBtn').addEventListener('click', nextEpisode);
+            
+            // Teclas de atalho
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowRight') {
+                    nextEpisode();
+                } else if (event.key === 'ArrowLeft') {
+                    previousEpisode();
+                }
+            });
+            
+            // --- Carga Inicial da Página ---
+            // 1. Preenche os controles da Temporada 1
+            updateEpisodes();
+            // 2. Carrega o primeiro episódio (T1E1) no player
+            loadEpisode();
         });
         
-        // Inicializa a página
-        updateEpisodes();
     </script>
 </body>
 </html>
