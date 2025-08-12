@@ -44,7 +44,7 @@
         .episode-grid::-webkit-scrollbar-track { background: transparent; }
         .episode-grid::-webkit-scrollbar-thumb { background: #3b4668; border-radius: 3px; }
         .episode-grid::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
-        .episode-item { flex-shrink: 0; background: #2a3452; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; border: 1px solid transparent; text-align: center; font-size: 0.9em; color: var(--text-secondary); }
+        .episode-item { flex-shrink: 0; background: #2a3452; padding: 10px 20px; border-radius: 8px; transition: all 0.2s ease-in-out; border: 1px solid transparent; text-align: center; font-size: 0.9em; color: var(--text-secondary); cursor: pointer; /* ✅ CORREÇÃO: Garante que o item seja clicável no iOS */ }
         .episode-item:hover { color: var(--text-primary); background-color: #3b4668; transform: translateY(-2px); }
         .episode-item.active { background: var(--accent-color); color: #fff; font-weight: bold; border-color: var(--accent-color); }
         @media (max-width: 768px) {
@@ -81,7 +81,7 @@
         </div>
         <div class="player-container">
             <div class="current-episode" id="currentEpisode">Selecione um episódio para começar</div>
-            <iframe id="playerFrame" src="about:blank" height="550" scrolling="no" allow="encrypted-media" allowfullscreen></iframe>
+            <iframe id="playerFrame" src="about:blank" height="550" scrolling="no" allow="encrypted-media; autoplay" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
         </div>
         <div class="episode-list">
             <div class="season-info" id="seasonInfo"></div>
@@ -172,7 +172,6 @@
             episodes.forEach(ep_data => {
                 const option = document.createElement('option');
                 option.value = ep_data.ep;
-                // MUDANÇA: Exibe o nome do episódio no menu dropdown
                 option.textContent = `Episódio ${ep_data.ep}: ${ep_data.title}`;
                 episodeSelect.appendChild(option);
             });
@@ -195,7 +194,6 @@
             episodes.forEach(ep_data => {
                 const episodeDiv = document.createElement('div');
                 episodeDiv.className = 'episode-item';
-                // MUDANÇA: Adiciona o título completo ao passar o mouse
                 episodeDiv.title = ep_data.title;
                 episodeDiv.textContent = `EP ${ep_data.ep}`;
                 if (ep_data.ep === currentEpisode) {
@@ -223,7 +221,6 @@
             
             document.getElementById('playerFrame').src = newUrl;
             
-            // MUDANÇA: Exibe o nome do episódio no título acima do player
             document.getElementById('currentEpisode').textContent = `T${seasonNum}:E${episodeNum} - ${episodeData.title}`;
             
             updateEpisodeGrid();
