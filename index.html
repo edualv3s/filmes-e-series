@@ -69,17 +69,14 @@
     </div>
     
     <script>
-        // =========================================================================================
-        // 🎯 MUDANÇA 1: O "BANCO DE DADOS" AGORA INCLUI O NOME DO SERVIDOR PARA CADA TEMPORADA
-        // =========================================================================================
         const the100Database = {
-            1: { episodes: 13, server: 'RCServer09' }, // Confirmado por você
-            2: { episodes: 16, server: 'RCServer09' }, // Confirmado por você
-            3: { episodes: 16, server: 'RCServer09' }, // Suposição, pode precisar de ajuste
-            4: { episodes: 13, server: 'RCServer09' }, // Suposição, pode precisar de ajuste
-            5: { episodes: 13, server: 'RCServer13' }, // Confirmado por você
-            6: { episodes: 13, server: 'RCServer13' }, // Suposição, pode precisar de ajuste
-            7: { episodes: 16, server: 'RCServer13' }  // Suposição, pode precisar de ajuste
+            1: { episodes: 13, server: 'RCServer09' },
+            2: { episodes: 16, server: 'RCServer09' },
+            3: { episodes: 16, server: 'RCServer09' },
+            4: { episodes: 13, server: 'RCServer09' },
+            5: { episodes: 13, server: 'RCServer13' },
+            6: { episodes: 13, server: 'RCServer13' },
+            7: { episodes: 16, server: 'RCServer13' }
         };
         
         function generateEpisodeCode(season, episode) {
@@ -138,12 +135,11 @@
             const seasonNum = parseInt(document.getElementById('season').value);
             const episodeNum = parseInt(document.getElementById('episode').value);
             
-            // =========================================================================================
-            // 🎯 MUDANÇA 2: A URL AGORA PEGA O NOME DO SERVIDOR DINAMICAMENTE DO BANCO DE DADOS
-            // =========================================================================================
             const serverName = the100Database[seasonNum].server;
             const episodeCode = generateEpisodeCode(seasonNum, episodeNum);
-            const newUrl = `//redecanais.to/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
+            
+            // CORREÇÃO APLICADA AQUI: USANDO O DOMÍNIO .gd
+            const newUrl = `//redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
             
             document.getElementById('playerFrame').src = newUrl;
             document.getElementById('currentEpisode').textContent = `The 100 - Temporada ${seasonNum}, Episódio ${episodeNum}`;
