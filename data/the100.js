@@ -1,7 +1,6 @@
 // data/the100.js
-
-// AQUI ESTÁ A CORREÇÃO: TROCANDO 'const' POR 'var'
-var seriesData = {
+// Dados da série The 100 com títulos corretos em português
+window.seriesData = {  // <-- MUDANÇA AQUI: window.seriesData ao invés de var seriesData
     title: "The 100", 
     database: {
         1: { episodes: Array.from({length: 13}, () => ({ server: 'RCServer09' })) },
@@ -35,8 +34,9 @@ const titles = {
     7: ["Vindo das Cinzas", "O Jardim", "Falsos Deuses", "Hesperides", "Bem-vindo Ao Bardo", "Nakara", "O Gambito da Rainha", "Anaconda", "O Rebanho", "Um Pequeno Sacrifício", "Etherea", "O Estranho", "Gigante de Sangue", "Uma Espécie De Regresso A Casa", "A Morte De Laiz", "A Última Guerra"]
 };
 
-for (const season in seriesData.database) {
-    seriesData.database[season].episodes.forEach((ep_data, index) => {
+// Preencher episódios com números e títulos
+for (const season in window.seriesData.database) {
+    window.seriesData.database[season].episodes.forEach((ep_data, index) => {
         ep_data.ep = index + 1;
         ep_data.title = titles[season]?.[index] || `Episódio ${index + 1}`;
     });
