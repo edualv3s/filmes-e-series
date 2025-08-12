@@ -1,607 +1,158 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Player de Episódios</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+    let currentSeriesData = {};
 
-    <style>
-        :root {
-            --background-dark: #0a0f1e;
-            --background-light: #1c233a;
-            --text-primary: #e0e6f1;
-            --text-secondary: #8892b0;
-            --accent-color: #00aaff;
-            --accent-color-darker: #0088cc;
-            --border-color: rgba(136, 146, 176, 0.2);
-            --font-family: 'Inter', sans-serif;
-        }
+    // Esta função será usada apenas por séries como The 100
+    function generateThe100Code(season, episode) {
+        const seasonStr = season.toString().padStart(2, '0');
+        const episodeStr = episode.toString().padStart(2, '0');
+        return `THE100S${seasonStr}EP${episodeStr}`;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            font-family: var(--font-family);
-            background: var(--background-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 40px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.2em;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-        }
-
-        h1::before {
-            content: '▶';
-            margin-right: 15px;
-            color: var(--accent-color);
-            font-size: 0.8em;
-        }
-        
-        .controls, .player-container, .episode-list {
-            background: var(--background-light);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .control-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        label {
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 0.9em;
-        }
-        
-        select, button {
-            background-color: #2a3452;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-family: var(--font-family);
-            font-size: 1em;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-
-        select:focus, button:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.2);
-        }
-        
-        button {
-            background: var(--accent-color);
-            color: #fff;
-            font-weight: bold;
-            border-color: var(--accent-color);
-            -webkit-appearance: none;
-        }
-        
-        button:hover, button:active {
-            background: var(--accent-color-darker);
-            border-color: var(--accent-color-darker);
-            transform: translateY(-1px);
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .nav-btn {
-            background: #3b4668;
-            border-color: #3b4668;
-            color: var(--text-secondary);
-            flex-grow: 1; 
-        }
-        .nav-btn:hover, .nav-btn:active {
-            background: #4c5a81;
-            border-color: #4c5a81;
-            color: var(--text-primary);
-        }
-        
-        .player-container {
-            padding: 15px;
-        }
-        
-        .current-episode {
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            font-weight: 500;
-            color: var(--text-primary);
-            text-align: left;
-        }
-
-        /* Container principal do player */
-        .video-container {
-            position: relative;
-            width: 100%;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Player para desktop */
-        .desktop-player {
-            width: 100%;
-            height: 500px;
-        }
-
-        .desktop-player iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Player para mobile/iOS */
-        .mobile-player {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            padding: 40px 20px;
-            text-align: center;
-            min-height: 400px;
-        }
-
-        .mobile-player-icon {
-            font-size: 4em;
-            margin-bottom: 10px;
-        }
-
-        .mobile-player h3 {
-            color: var(--text-primary);
-            font-size: 1.4em;
-            margin-bottom: 10px;
-        }
-
-        .mobile-player p {
-            color: var(--text-secondary);
-            margin-bottom: 25px;
-            line-height: 1.5;
-            max-width: 300px;
-        }
-
-        .watch-button {
-            background: linear-gradient(135deg, var(--accent-color), var(--accent-color-darker));
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 170, 255, 0.3);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .watch-button:hover, .watch-button:active {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 170, 255, 0.4);
-        }
-
-        .copy-button {
-            background: #4a5568;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .copy-button:hover, .copy-button:active {
-            background: #5a6578;
-        }
-
-        .season-info {
-            text-align: left;
-            margin-bottom: 15px;
-            color: var(--text-secondary);
-            font-size: 1.1em;
-        }
-
-        .episode-grid {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 15px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .episode-grid::-webkit-scrollbar { height: 6px; }
-        .episode-grid::-webkit-scrollbar-track { background: transparent; }
-        .episode-grid::-webkit-scrollbar-thumb { background: #3b4668; border-radius: 3px; }
-        .episode-grid::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
-
-        .episode-item {
-            flex-shrink: 0;
-            background: #2a3452;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            border: 1px solid transparent;
-            text-align: center;
-            font-size: 0.9em;
-            color: var(--text-secondary);
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .episode-item:hover, .episode-item:active {
-            color: var(--text-primary);
-            background-color: #3b4668;
-            transform: translateY(-2px);
-        }
-        
-        .episode-item.active {
-            background: var(--accent-color);
-            color: #fff;
-            font-weight: bold;
-            border-color: var(--accent-color);
-        }
-
-        /* Media queries */
-        @media (max-width: 768px) {
-            body { 
-                padding-top: 20px; 
-                padding-bottom: 20px;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            h1 { 
-                font-size: 1.6em;
-                margin-bottom: 30px;
-            }
-
-            .controls, .player-container, .episode-list {
-                padding: 15px;
-            }
-
-            .control-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 15px;
-            }
-
-            .control-group label {
-                text-align: left;
-            }
-            
-            .nav-buttons {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            
-            .desktop-player {
-                display: none !important;
-            }
-
-            .mobile-player {
-                display: flex !important;
-            }
-
-            .video-container {
-                min-height: 300px;
-            }
-
-            select, button {
-                padding: 15px 16px;
-                font-size: 1.1em;
-            }
-        }
-
-        /* Detecção específica para iOS */
-        @supports (-webkit-touch-callout: none) {
-            @media (max-width: 768px) {
-                .desktop-player {
-                    display: none !important;
-                }
-
-                .mobile-player {
-                    display: flex !important;
-                }
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container" id="player-container-main" style="display: none;">
-        <h1 id="seriesTitle"></h1>
-        <div class="controls">
-            <div class="control-group">
-                <label>Temporada:</label>
-                <select id="season"></select>
-                <label>Episódio:</label>
-                <select id="episode"></select>
-                <button id="loadEpisodeBtn">▶ Carregar</button>
-            </div>
-            <div class="nav-buttons">
-                <button id="prevEpisodeBtn" class="nav-btn">⬅ Anterior</button>
-                <button id="nextEpisodeBtn" class="nav-btn">Próximo ➡</button>
-            </div>
-        </div>
-        <div class="player-container">
-            <div class="current-episode" id="currentEpisode">Selecione um episódio para começar</div>
-            
-            <div class="video-container">
-                <!-- Player para desktop -->
-                <div class="desktop-player" id="desktopPlayer">
-                    <iframe id="playerFrame" src="about:blank" scrolling="no" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen></iframe>
-                </div>
-
-                <!-- Player para mobile/iOS -->
-                <div class="mobile-player" id="mobilePlayer">
-                    <div class="mobile-player-icon">🎬</div>
-                    <h3>Assistir Episódio</h3>
-                    <p>Para a melhor experiência no celular, abra o vídeo diretamente no navegador.</p>
-                    <a href="#" class="watch-button" id="watchButton" target="_blank">
-                        🚀 Abrir Vídeo
-                    </a>
-                    <button class="copy-button" id="copyUrlButton">📋 Copiar Link</button>
-                </div>
-            </div>
-        </div>
-        <div class="episode-list">
-            <div class="season-info" id="seasonInfo"></div>
-            <div class="episode-grid" id="episodeGrid"></div>
-        </div>
-    </div>
-    
-    <script>
-        let currentSeriesData = {};
-        let currentUrl = '';
-
-        function generateEpisodeCode(season, episode) {
-            const seasonStr = season.toString().padStart(2, '0');
-            const episodeStr = episode.toString().padStart(2, '0');
-            return `THE100S${seasonStr}EP${episodeStr}`;
-        }
-        
-        function updateSeasonOptions(database) {
-            const seasonSelect = document.getElementById('season');
-            seasonSelect.innerHTML = '';
-            Object.keys(database).forEach(seasonNum => {
-                const option = document.createElement('option');
-                option.value = seasonNum;
-                option.textContent = `Temporada ${seasonNum}`;
-                seasonSelect.appendChild(option);
-            });
-        }
-        
-        function updateEpisodes() {
-            const seasonNum = parseInt(document.getElementById('season').value);
-            const episodeSelect = document.getElementById('episode');
-            const episodes = currentSeriesData.database[seasonNum].episodes;
-            episodeSelect.innerHTML = '';
-            episodes.forEach(ep_data => {
-                const option = document.createElement('option');
-                option.value = ep_data.ep;
-                option.textContent = `Episódio ${ep_data.ep}: ${ep_data.title}`;
-                episodeSelect.appendChild(option);
-            });
-            updateSeasonInfo();
-        }
-        
-        function updateSeasonInfo() {
-            const seasonNum = parseInt(document.getElementById('season').value);
-            const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
-            document.getElementById('seasonInfo').textContent = `Temporada ${seasonNum} - ${maxEpisodes} Episódios`;
-        }
-        
-        function updateEpisodeGrid() {
-            const seasonNum = parseInt(document.getElementById('season').value);
-            const currentEpisode = parseInt(document.getElementById('episode').value);
-            const episodes = currentSeriesData.database[seasonNum].episodes;
-            const gridContainer = document.getElementById('episodeGrid');
-            gridContainer.innerHTML = '';
-            episodes.forEach(ep_data => {
-                const episodeDiv = document.createElement('div');
-                episodeDiv.className = 'episode-item';
-                episodeDiv.title = ep_data.title;
-                episodeDiv.textContent = `EP ${ep_data.ep}`;
-                if (ep_data.ep === currentEpisode) {
-                    episodeDiv.classList.add('active');
-                }
-                episodeDiv.onclick = () => {
-                    document.getElementById('episode').value = ep_data.ep;
-                    loadEpisode();
-                };
-                gridContainer.appendChild(episodeDiv);
-            });
-        }
-        
-        function loadEpisode() {
-            const seasonNum = parseInt(document.getElementById('season').value);
-            const episodeNum = parseInt(document.getElementById('episode').value);
-            const episodeData = currentSeriesData.database[seasonNum].episodes.find(e => e.ep == episodeNum);
-            
-            if (!episodeData) return;
-            
-            const serverName = episodeData.server;
-            const episodeCode = generateEpisodeCode(seasonNum, episodeNum);
-            currentUrl = `https://redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
-            
-            // Atualizar informações do episódio
-            document.getElementById('currentEpisode').textContent = `T${seasonNum}:E${episodeNum} - ${episodeData.title}`;
-            
-            // Carregar no iframe (desktop)
-            const playerFrame = document.getElementById('playerFrame');
-            playerFrame.src = currentUrl;
-            
-            // Configurar botões mobile
-            const watchButton = document.getElementById('watchButton');
-            const copyUrlButton = document.getElementById('copyUrlButton');
-            
-            watchButton.href = currentUrl;
-            
-            copyUrlButton.onclick = async () => {
-                try {
-                    await navigator.clipboard.writeText(currentUrl);
-                    copyUrlButton.textContent = '✅ Copiado!';
-                    setTimeout(() => {
-                        copyUrlButton.textContent = '📋 Copiar Link';
-                    }, 2000);
-                } catch (err) {
-                    // Fallback para dispositivos que não suportam clipboard API
-                    const textArea = document.createElement('textarea');
-                    textArea.value = currentUrl;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    copyUrlButton.textContent = '✅ Copiado!';
-                    setTimeout(() => {
-                        copyUrlButton.textContent = '📋 Copiar Link';
-                    }, 2000);
-                }
-            };
-            
-            updateEpisodeGrid();
-        }
-        
-        function nextEpisode() {
-            const seasonNum = parseInt(document.getElementById('season').value);
-            let episodeNum = parseInt(document.getElementById('episode').value);
-            const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
-            
-            if (episodeNum < maxEpisodes) {
-                document.getElementById('episode').value = episodeNum + 1;
-                loadEpisode();
-            } else if (seasonNum < Object.keys(currentSeriesData.database).length) {
-                document.getElementById('season').value = parseInt(seasonNum) + 1;
-                updateEpisodes();
-                document.getElementById('episode').value = 1;
-                loadEpisode();
-            } else {
-                alert('Você chegou ao final da série! 🎉');
-            }
-        }
-        
-        function previousEpisode() {
-            const seasonNum = parseInt(document.getElementById('season').value);
-            let episodeNum = parseInt(document.getElementById('episode').value);
-            
-            if (episodeNum > 1) {
-                document.getElementById('episode').value = episodeNum - 1;
-                loadEpisode();
-            } else if (seasonNum > 1) {
-                const prevSeason = seasonNum - 1;
-                document.getElementById('season').value = prevSeason;
-                updateEpisodes();
-                const maxEpisodesPrevSeason = currentSeriesData.database[prevSeason].episodes.length;
-                document.getElementById('episode').value = maxEpisodesPrevSeason;
-                loadEpisode();
-            } else {
-                alert('Você está no primeiro episódio da série! 🏁');
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const serieId = params.get('serie');
-            
-            if (serieId) {
-                const script = document.createElement('script');
-                script.src = `data/${serieId}.js`;
-                script.onload = () => {
-                    currentSeriesData = window.seriesData;
-                    document.title = `${currentSeriesData.title} - Player de Episódios`;
-                    document.getElementById('seriesTitle').textContent = `${currentSeriesData.title} (Legendado)`;
-                    document.getElementById('player-container-main').style.display = 'block';
-                    setupPlayer();
-                };
-                script.onerror = () => { 
-                    document.body.innerHTML = `<h1>Erro: Não foi possível carregar os dados para a série "${serieId}". Verifique se o arquivo "data/${serieId}.js" existe.</h1>`; 
-                };
-                document.body.appendChild(script);
-            } else {
-                document.body.innerHTML = '<h1>Nenhuma série selecionada. Volte para o menu principal.</h1>';
-            }
+    function updateSeasonOptions(database) {
+        const seasonSelect = document.getElementById('season');
+        seasonSelect.innerHTML = '';
+        Object.keys(database).forEach(seasonNum => {
+            const option = document.createElement('option');
+            option.value = seasonNum;
+            option.textContent = `Temporada ${seasonNum}`;
+            seasonSelect.appendChild(option);
         });
-        
-        function setupPlayer() {
-            updateSeasonOptions(currentSeriesData.database);
-            document.getElementById('season').value = 1;
-            
-            document.getElementById('season').addEventListener('change', () => {
-                updateEpisodes();
-                document.getElementById('episode').value = 1;
-                loadEpisode();
-            });
-            
-            document.getElementById('loadEpisodeBtn').addEventListener('click', loadEpisode);
-            document.getElementById('prevEpisodeBtn').addEventListener('click', previousEpisode);
-            document.getElementById('nextEpisodeBtn').addEventListener('click', nextEpisode);
-            
-            // Suporte ao teclado (apenas para desktop)
-            if (window.innerWidth > 768) {
-                document.addEventListener('keydown', function(event) {
-                    if (event.key === 'ArrowRight') {
-                        event.preventDefault();
-                        nextEpisode();
-                    } else if (event.key === 'ArrowLeft') {
-                        event.preventDefault();
-                        previousEpisode();
-                    }
-                });
+    }
+    function updateEpisodes() {
+        const seasonNum = parseInt(document.getElementById('season').value);
+        const episodeSelect = document.getElementById('episode');
+        const episodes = currentSeriesData.database[seasonNum].episodes;
+        episodeSelect.innerHTML = '';
+        episodes.forEach(ep_data => {
+            const option = document.createElement('option');
+            option.value = ep_data.ep;
+            option.textContent = `Episódio ${ep_data.ep}: ${ep_data.title}`;
+            episodeSelect.appendChild(option);
+        });
+        updateSeasonInfo();
+    }
+    function updateSeasonInfo() {
+        const seasonNum = parseInt(document.getElementById('season').value);
+        const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
+        document.getElementById('seasonInfo').textContent = `Temporada ${seasonNum} - ${maxEpisodes} Episódios`;
+    }
+    function updateEpisodeGrid() {
+        const seasonNum = parseInt(document.getElementById('season').value);
+        const currentEpisode = parseInt(document.getElementById('episode').value);
+        const episodes = currentSeriesData.database[seasonNum].episodes;
+        const gridContainer = document.getElementById('episodeGrid');
+        gridContainer.innerHTML = '';
+        episodes.forEach(ep_data => {
+            const episodeDiv = document.createElement('div');
+            episodeDiv.className = 'episode-item';
+            episodeDiv.title = ep_data.title;
+            episodeDiv.textContent = `EP ${ep_data.ep}`;
+            if (ep_data.ep === currentEpisode) {
+                episodeDiv.classList.add('active');
             }
-            
-            updateEpisodes();
-            loadEpisode();
+            episodeDiv.onclick = () => {
+                document.getElementById('episode').value = ep_data.ep;
+                loadEpisode();
+            };
+            gridContainer.appendChild(episodeDiv);
+        });
+    }
+    function loadEpisode() {
+        const seasonNum = parseInt(document.getElementById('season').value);
+        const episodeNum = parseInt(document.getElementById('episode').value);
+        const episodeData = currentSeriesData.database[seasonNum].episodes.find(e => e.ep == episodeNum);
+        if (!episodeData) return;
+
+        let newUrl = '';
+
+        // LÓGICA NOVA: Decide como montar a URL com base nos dados da série
+        if (currentSeriesData.url_pattern) {
+            // Se tiver um 'url_pattern', usa o padrão novo (para Ahsoka)
+            newUrl = currentSeriesData.url_pattern + episodeData.id;
+        } else {
+            // Senão, usa o padrão antigo (para The 100)
+            const serverName = episodeData.server;
+            const episodeCode = generateThe100Code(seasonNum, episodeNum);
+            newUrl = `//redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
         }
-    </script>
-</body>
-</html>
+        
+        document.getElementById('playerFrame').src = newUrl;
+        document.getElementById('currentEpisode').textContent = `T${seasonNum}:E${episodeNum} - ${episodeData.title}`;
+        
+        // Atualiza o botão de "Abrir Vídeo" para mobile
+        const watchButton = document.getElementById('watchButton');
+        if(watchButton) watchButton.href = newUrl;
+
+        updateEpisodeGrid();
+    }
+    function nextEpisode() {
+        const seasonNum = parseInt(document.getElementById('season').value);
+        let episodeNum = parseInt(document.getElementById('episode').value);
+        const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
+        if (episodeNum < maxEpisodes) {
+            document.getElementById('episode').value = episodeNum + 1;
+            loadEpisode();
+        } else if (seasonNum < Object.keys(currentSeriesData.database).length) {
+            document.getElementById('season').value = parseInt(seasonNum) + 1;
+            updateEpisodes();
+            document.getElementById('episode').value = 1;
+            loadEpisode();
+        } else {
+            alert('Você chegou ao final da série! 🎉');
+        }
+    }
+    function previousEpisode() {
+        const seasonNum = parseInt(document.getElementById('season').value);
+        let episodeNum = parseInt(document.getElementById('episode').value);
+        if (episodeNum > 1) {
+            document.getElementById('episode').value = episodeNum - 1;
+            loadEpisode();
+        } else if (seasonNum > 1) {
+            const prevSeason = seasonNum - 1;
+            document.getElementById('season').value = prevSeason;
+            updateEpisodes();
+            const maxEpisodesPrevSeason = currentSeriesData.database[prevSeason].episodes.length;
+            document.getElementById('episode').value = maxEpisodesPrevSeason;
+            loadEpisode();
+        } else {
+            alert('Você está no primeiro episódio da série! 🏁');
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const serieId = params.get('serie');
+        if (serieId) {
+            const script = document.createElement('script');
+            script.src = `data/${serieId}.js`;
+            script.onload = () => {
+                currentSeriesData = window.seriesData;
+                document.title = `${currentSeriesData.title} - Player`;
+                document.getElementById('seriesTitle').textContent = `${currentSeriesData.title}`;
+                document.getElementById('player-container-main').style.display = 'block';
+                setupPlayer();
+            };
+            script.onerror = () => { document.body.innerHTML = `<h1>Erro: Não foi possível carregar os dados para a série "${serieId}". Verifique se o arquivo "data/${serieId}.js" existe.</h1>`; };
+            document.body.appendChild(script);
+        } else {
+            document.body.innerHTML = '<h1>Nenhuma série selecionada. Volte para o menu principal.</h1>';
+        }
+    });
+    function setupPlayer() {
+        updateSeasonOptions(currentSeriesData.database);
+        document.getElementById('season').value = 1;
+        document.getElementById('season').addEventListener('change', () => {
+            updateEpisodes();
+            document.getElementById('episode').value = 1;
+            loadEpisode();
+        });
+        document.getElementById('loadEpisodeBtn').addEventListener('click', loadEpisode);
+        document.getElementById('prevEpisodeBtn').addEventListener('click', previousEpisode);
+        document.getElementById('nextEpisodeBtn').addEventListener('click', nextEpisode);
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight') nextEpisode(); 
+            else if (event.key === 'ArrowLeft') previousEpisode();
+        });
+        updateEpisodes();
+        loadEpisode();
+    }
+</script>
