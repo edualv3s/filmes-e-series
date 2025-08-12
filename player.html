@@ -281,7 +281,6 @@
             .control-group label { text-align: left; }
             .nav-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
             
-            /* Lógica para trocar a visualização do player em mobile */
             .desktop-player { display: none !important; }
             .mobile-player { display: flex !important; }
 
@@ -335,7 +334,6 @@
     <script>
         let currentSeriesData = {};
 
-        // Função específica para gerar o código de The 100
         function generateThe100Code(season, episode) {
             const seasonStr = season.toString().padStart(2, '0');
             const episodeStr = episode.toString().padStart(2, '0');
@@ -403,18 +401,16 @@
 
             let newUrl = '';
 
-            // LÓGICA INTELIGENTE: Decide como montar a URL com base nos dados da série
-            if (currentSeriesData.url_pattern) {
-                // Se tiver um 'url_pattern', usa o padrão novo (para Ahsoka)
+            if (currentSeriesData.url_template) {
+                newUrl = currentSeriesData.url_template.replace('##ID##', episodeData.id);
+            } else if (currentSeriesData.url_pattern) {
                 newUrl = currentSeriesData.url_pattern + episodeData.id;
             } else {
-                // Senão, usa o padrão antigo (para The 100)
                 const serverName = episodeData.server;
                 const episodeCode = generateThe100Code(seasonNum, episodeNum);
                 newUrl = `https://redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
             }
             
-            // ATUALIZA AMBOS: O player de desktop e o botão de mobile
             document.getElementById('playerFrame').src = newUrl;
             const watchButton = document.getElementById('watchButton');
             if (watchButton) watchButton.href = newUrl;
