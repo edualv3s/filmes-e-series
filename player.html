@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Player de Episódios</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -37,6 +38,7 @@
             justify-content: center;
             align-items: flex-start;
             padding-top: 40px;
+            -webkit-overflow-scrolling: touch;
         }
         
         .container {
@@ -94,6 +96,9 @@
             font-size: 1em;
             transition: all 0.2s ease-in-out;
             cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         select:focus, button:focus {
@@ -107,9 +112,10 @@
             color: #fff;
             font-weight: bold;
             border-color: var(--accent-color);
+            -webkit-appearance: none;
         }
         
-        button:hover {
+        button:hover, button:active {
             background: var(--accent-color-darker);
             border-color: var(--accent-color-darker);
             transform: translateY(-2px);
@@ -127,7 +133,7 @@
             color: var(--text-secondary);
             flex-grow: 1; 
         }
-        .nav-btn:hover {
+        .nav-btn:hover, .nav-btn:active {
             background: #4c5a81;
             border-color: #4c5a81;
             color: var(--text-primary);
@@ -145,11 +151,45 @@
             text-align: left;
         }
         
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000;
+        }
+
         iframe {
             width: 100%;
-            border-radius: 8px;
+            height: 100%;
             border: none;
             background-color: #000;
+            border-radius: 8px;
+        }
+
+        .loading-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .open-external-btn {
+            margin-top: 15px;
+            background: #4a5568;
+            border-color: #4a5568;
+            width: 100%;
+            font-size: 0.9em;
+        }
+
+        .open-external-btn:hover, .open-external-btn:active {
+            background: #5a6578;
+            border-color: #5a6578;
         }
 
         .season-info {
@@ -183,9 +223,10 @@
             text-align: center;
             font-size: 0.9em;
             color: var(--text-secondary);
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .episode-item:hover {
+        .episode-item:hover, .episode-item:active {
             color: var(--text-primary);
             background-color: #3b4668;
             transform: translateY(-2px);
@@ -220,26 +261,41 @@
                 padding: 15px;
             }
 
-            /* Faz os controles principais ficarem em coluna */
             .control-group {
                 flex-direction: column;
-                align-items: stretch; /* Estica os itens para preencher 100% da largura */
+                align-items: stretch;
                 gap: 15px;
             }
 
-            /* Garante que o texto da label fique alinhado à esquerda */
             .control-group label {
                 text-align: left;
             }
             
-            /* Faz os botões de navegação se dividirem em 2 colunas */
             .nav-buttons {
                 display: grid;
-                grid-template-columns: 1fr 1fr; /* Duas colunas de tamanho igual */
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
             }
             
-            iframe { 
-                height: 250px; 
+            .iframe-container {
+                height: 300px;
+            }
+
+            select, button {
+                padding: 15px 16px;
+                font-size: 1.1em;
+            }
+        }
+
+        /* Ajustes específicos para iOS */
+        @supports (-webkit-touch-callout: none) {
+            iframe {
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+            }
+            
+            .iframe-container {
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -262,7 +318,16 @@
         </div>
         <div class="player-container">
             <div class="current-episode" id="currentEpisode">Selecione um episódio para começar</div>
-            <iframe id="playerFrame" src="about:blank" height="550" scrolling="no" allow="encrypted-media" allowfullscreen></iframe>
+            <div class="iframe-container">
+                <div class="loading-message" id="loadingMessage">Carregando player...</div>
+                <iframe id="playerFrame" src="about:blank" scrolling="no" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+            </div>
+            <button id="openExternalBtn" class="open-external-btn" style="display: none;">
+                🔗 Abrir em Nova Aba (Recomendado para iOS)
+            </button>
         </div>
         <div class="episode-list">
             <div class="season-info" id="seasonInfo"></div>
@@ -272,11 +337,15 @@
     
     <script>
         let currentSeriesData = {};
+        let currentUrl = '';
+        let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
         function generateEpisodeCode(season, episode) {
             const seasonStr = season.toString().padStart(2, '0');
             const episodeStr = episode.toString().padStart(2, '0');
             return `THE100S${seasonStr}EP${episodeStr}`;
         }
+        
         function updateSeasonOptions(database) {
             const seasonSelect = document.getElementById('season');
             seasonSelect.innerHTML = '';
@@ -287,6 +356,7 @@
                 seasonSelect.appendChild(option);
             });
         }
+        
         function updateEpisodes() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const episodeSelect = document.getElementById('episode');
@@ -300,11 +370,13 @@
             });
             updateSeasonInfo();
         }
+        
         function updateSeasonInfo() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
             document.getElementById('seasonInfo').textContent = `Temporada ${seasonNum} - ${maxEpisodes} Episódios`;
         }
+        
         function updateEpisodeGrid() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const currentEpisode = parseInt(document.getElementById('episode').value);
@@ -326,22 +398,64 @@
                 gridContainer.appendChild(episodeDiv);
             });
         }
+        
         function loadEpisode() {
             const seasonNum = parseInt(document.getElementById('season').value);
             const episodeNum = parseInt(document.getElementById('episode').value);
             const episodeData = currentSeriesData.database[seasonNum].episodes.find(e => e.ep == episodeNum);
+            
             if (!episodeData) return;
+            
             const serverName = episodeData.server;
             const episodeCode = generateEpisodeCode(seasonNum, episodeNum);
-            const newUrl = `//redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
-            document.getElementById('playerFrame').src = newUrl;
+            currentUrl = `https://redecanais.gd/player3/server.php?server=${serverName}&subfolder=ondemand&vid=${episodeCode}`;
+            
+            const playerFrame = document.getElementById('playerFrame');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const openExternalBtn = document.getElementById('openExternalBtn');
+            
+            // Mostrar loading
+            loadingMessage.style.display = 'block';
+            
+            // Configurar botão externo
+            openExternalBtn.style.display = 'block';
+            openExternalBtn.onclick = () => {
+                window.open(currentUrl, '_blank', 'noopener,noreferrer');
+            };
+            
+            // Tentar carregar no iframe
+            if (isIOS) {
+                // No iOS, dar um pequeno delay para melhorar compatibilidade
+                setTimeout(() => {
+                    playerFrame.src = currentUrl;
+                }, 500);
+                
+                // Esconder loading após um tempo no iOS
+                setTimeout(() => {
+                    loadingMessage.style.display = 'none';
+                }, 3000);
+            } else {
+                playerFrame.src = currentUrl;
+                
+                // Event listener para esconder loading quando carregar
+                playerFrame.onload = () => {
+                    loadingMessage.style.display = 'none';
+                };
+                
+                playerFrame.onerror = () => {
+                    loadingMessage.innerHTML = '❌ Erro ao carregar. Use o botão abaixo.';
+                };
+            }
+            
             document.getElementById('currentEpisode').textContent = `T${seasonNum}:E${episodeNum} - ${episodeData.title}`;
             updateEpisodeGrid();
         }
+        
         function nextEpisode() {
             const seasonNum = parseInt(document.getElementById('season').value);
             let episodeNum = parseInt(document.getElementById('episode').value);
             const maxEpisodes = currentSeriesData.database[seasonNum].episodes.length;
+            
             if (episodeNum < maxEpisodes) {
                 document.getElementById('episode').value = episodeNum + 1;
                 loadEpisode();
@@ -354,9 +468,11 @@
                 alert('Você chegou ao final da série! 🎉');
             }
         }
+        
         function previousEpisode() {
             const seasonNum = parseInt(document.getElementById('season').value);
             let episodeNum = parseInt(document.getElementById('episode').value);
+            
             if (episodeNum > 1) {
                 document.getElementById('episode').value = episodeNum - 1;
                 loadEpisode();
@@ -371,9 +487,11 @@
                 alert('Você está no primeiro episódio da série! 🏁');
             }
         }
+        
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const serieId = params.get('serie');
+            
             if (serieId) {
                 const script = document.createElement('script');
                 script.src = `data/${serieId}.js`;
@@ -384,27 +502,40 @@
                     document.getElementById('player-container-main').style.display = 'block';
                     setupPlayer();
                 };
-                script.onerror = () => { document.body.innerHTML = `<h1>Erro: Não foi possível carregar os dados para a série "${serieId}". Verifique se o arquivo "data/${serieId}.js" existe.</h1>`; };
+                script.onerror = () => { 
+                    document.body.innerHTML = `<h1>Erro: Não foi possível carregar os dados para a série "${serieId}". Verifique se o arquivo "data/${serieId}.js" existe.</h1>`; 
+                };
                 document.body.appendChild(script);
             } else {
                 document.body.innerHTML = '<h1>Nenhuma série selecionada. Volte para o menu principal.</h1>';
             }
         });
+        
         function setupPlayer() {
             updateSeasonOptions(currentSeriesData.database);
             document.getElementById('season').value = 1;
+            
             document.getElementById('season').addEventListener('change', () => {
                 updateEpisodes();
                 document.getElementById('episode').value = 1;
                 loadEpisode();
             });
+            
             document.getElementById('loadEpisodeBtn').addEventListener('click', loadEpisode);
             document.getElementById('prevEpisodeBtn').addEventListener('click', previousEpisode);
             document.getElementById('nextEpisodeBtn').addEventListener('click', nextEpisode);
+            
+            // Melhorar suporte ao teclado
             document.addEventListener('keydown', function(event) {
-                if (event.key === 'ArrowRight') nextEpisode(); 
-                else if (event.key === 'ArrowLeft') previousEpisode();
+                if (event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    nextEpisode();
+                } else if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    previousEpisode();
+                }
             });
+            
             updateEpisodes();
             loadEpisode();
         }
