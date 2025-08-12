@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player de Séries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .controls {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        select, input {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            font-size: 14px;
+            min-width: 120px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .player-container {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .current-episode {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: #ffd700;
+        }
+        
+        iframe {
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            max-width: 100%;
+        }
+        
+        .episode-list {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .episode-item {
+            background: rgba(255,255,255,0.1);
+            margin: 5px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .episode-item:hover {
+            background: rgba(255,255,255,0.2);
+            border-left-color: #ffd700;
+            transform: translateX(5px);
+        }
+        
+        .episode-item.active {
+            background: rgba(255,215,0,0.2);
+            border-left-color: #ffd700;
+        }
+        
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            label {
+                min-width: auto;
+            }
+            
+            iframe {
+                width: 100%;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Player de Séries</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Série:</label>
+                <input type="text" id="seriesName" placeholder="Nome da série" value="The 100">
+                
+                <label>Temporada:</label>
+                <select id="season">
+                    <option value="01">Temporada 1</option>
+                    <option value="02">Temporada 2</option>
+                    <option value="03">Temporada 3</option>
+                    <option value="04">Temporada 4</option>
+                    <option value="05" selected>Temporada 5</option>
+                    <option value="06">Temporada 6</option>
+                    <option value="07">Temporada 7</option>
+                </select>
+                
+                <label>Episódio:</label>
+                <select id="episode">
+                    <option value="01">Episódio 1</option>
+                    <option value="02">Episódio 2</option>
+                    <option value="03">Episódio 3</option>
+                    <option value="04">Episódio 4</option>
+                    <option value="05">Episódio 5</option>
+                    <option value="06">Episódio 6</option>
+                    <option value="07">Episódio 7</option>
+                    <option value="08" selected>Episódio 8</option>
+                    <option value="09">Episódio 9</option>
+                    <option value="10">Episódio 10</option>
+                </select>
+                
+                <button onclick="loadEpisode()">▶️ Carregar Episódio</button>
+            </div>
+        </div>
+        
+        <div class="player-container">
+            <div class="current-episode" id="currentEpisode">
+                The 100 - Temporada 5, Episódio 8
+            </div>
+            
+            <iframe id="playerFrame" 
+                    src="//redecanais.gd/player3/server.php?server=RCServer13&subfolder=ondemand&vid=THE100S05EP08" 
+                    frameborder="0" 
+                    height="400" 
+                    width="640" 
+                    scrolling="no"
+                    allow="encrypted-media" 
+                    allowfullscreen>
+            </iframe>
+        </div>
+        
+        <div class="episode-list">
+            <h3>🗂️ Lista de Episódios</h3>
+            <div id="episodeList"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Configurações da série
+        const seriesConfig = {
+            'The 100': {
+                code: 'THE100',
+                seasons: {
+                    '01': 13,
+                    '02': 16,
+                    '03': 16,
+                    '04': 13,
+                    '05': 13,
+                    '06': 13,
+                    '07': 16
+                }
+            }
+            // Você pode adicionar mais séries aqui
+        };
+        
+        function updateEpisodeOptions() {
+            const seriesName = document.getElementById('seriesName').value;
+            const season = document.getElementById('season').value;
+            const episodeSelect = document.getElementById('episode');
+            
+            // Limpa opções atuais
+            episodeSelect.innerHTML = '';
+            
+            // Se a série estiver configurada, use o número correto de episódios
+            let maxEpisodes = 16; // padrão
+            if (seriesConfig[seriesName] && seriesConfig[seriesName].seasons[season]) {
+                maxEpisodes = seriesConfig[seriesName].seasons[season];
+            }
+            
+            // Adiciona opções de episódios
+            for (let i = 1; i <= maxEpisodes; i++) {
+                const option = document.createElement('option');
+                const episodeNum = i.toString().padStart(2, '0');
+                option.value = episodeNum;
+                option.textContent = `Episódio ${i}`;
+                episodeSelect.appendChild(option);
+            }
+        }
+        
+        function generateEpisodeCode(seriesName, season, episode) {
+            // Remove espaços e caracteres especiais do nome da série
+            const cleanName = seriesName.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            return `${cleanName}S${season}EP${episode}`;
+        }
+        
+        function loadEpisode() {
+            const seriesName = document.getElementById('seriesName').value;
+            const season = document.getElementById('season').value;
+            const episode = document.getElementById('episode').value;
+            
+            const episodeCode = generateEpisodeCode(seriesName, season, episode);
+            const newUrl = `//redecanais.gd/player3/server.php?server=RCServer13&subfolder=ondemand&vid=${episodeCode}`;
+            
+            document.getElementById('playerFrame').src = newUrl;
+            document.getElementById('currentEpisode').textContent = 
+                `${seriesName} - Temporada ${parseInt(season)}, Episódio ${parseInt(episode)}`;
+            
+            updateEpisodeList();
+        }
+        
+        function updateEpisodeList() {
+            const seriesName = document.getElementById('seriesName').value;
+            const currentSeason = document.getElementById('season').value;
+            const currentEpisode = document.getElementById('episode').value;
+            const listContainer = document.getElementById('episodeList');
+            
+            listContainer.innerHTML = '';
+            
+            // Número de episódios para a temporada atual
+            let maxEpisodes = 16;
+            if (seriesConfig[seriesName] && seriesConfig[seriesName].seasons[currentSeason]) {
+                maxEpisodes = seriesConfig[seriesName].seasons[currentSeason];
+            }
+            
+            for (let i = 1; i <= maxEpisodes; i++) {
+                const episodeNum = i.toString().padStart(2, '0');
+                const episodeDiv = document.createElement('div');
+                episodeDiv.className = 'episode-item';
+                episodeDiv.textContent = `Episódio ${i}`;
+                
+                if (episodeNum === currentEpisode) {
+                    episodeDiv.classList.add('active');
+                }
+                
+                episodeDiv.onclick = () => {
+                    document.getElementById('episode').value = episodeNum;
+                    loadEpisode();
+                };
+                
+                listContainer.appendChild(episodeDiv);
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('season').onchange = updateEpisodeOptions;
+        document.getElementById('seriesName').onchange = updateEpisodeOptions;
+        
+        // Inicializa a página
+        updateEpisodeOptions();
+        updateEpisodeList();
+    </script>
+</body>
+</html>
